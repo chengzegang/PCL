@@ -163,3 +163,5 @@ draft*
 
 cache/
 db/
+data/
+!data/*.tar
