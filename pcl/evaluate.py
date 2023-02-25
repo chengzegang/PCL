@@ -1,17 +1,12 @@
-from functools import partial
 from typing import Tuple
 
 import pandas as pd
 import torch
-from torch.optim import Adam
-from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader
-from torchvision.transforms import Normalize, Resize
-from tqdm.auto import tqdm
+from torchvision.transforms import Resize
 
-from . import lr_lambda, models
+from . import models
 from .dataset import ImageFolder
-from .pipeline import PCL
 from . import metrics
 
 
