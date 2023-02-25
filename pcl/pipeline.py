@@ -1,3 +1,4 @@
+from typing import Dict
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
@@ -20,17 +21,23 @@ class PCL(nn.Module):
     ) -> None:
         super().__init__()
         self.encoder = encoder
-        self.moment_state = encoder.state_dict()
-        self.train_state = encoder.state_dict()
+        self.moment_state: Dict | None = None
+        self.train_state: Dict | None = None
         self.num_iters = num_iters
         self.num_cluster_iters = num_cluster_iters
         self.t = temperature
         self.phi = concentration
-        self.moment = Momentum(self.train_state, self.moment_state, momentum)
+        self.momentum = momentum
+        self.moment: Momentum | None = None
 
     def backward(self, x: Tensor) -> Tensor:
         loss = torch.zeros(1, device=x.device).type_as(x)
-        self.moment.step()
+        if self.moment is None or self.moment_state is None or self.train_state is None:
+            self.moment_state = self.encoder.state_dict()
+            self.train_state = self.encoder.state_dict()
+            self.moment = Momentum(self.encoder, self.encoder, momentum=self.momentum)
+        else:
+            self.moment.step()
         self.encoder.train()
         for _ in range(self.num_cluster_iters):
             self.encoder.load_state_dict(self.moment_state)
